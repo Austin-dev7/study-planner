@@ -1,0 +1,122 @@
+{% extends "base.html" %}
+
+{% block title %}Add Task - Study Planner{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h1>Add Task</h1>
+</div>
+
+<div class="form-container">
+<form method="POST" action="{{ url_for('add_task') }}">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        <div class="form-group">
+            <label class="form-label">Title</label>
+            <input type="text" name="title" class="form-input" placeholder="Enter task title" required>
+        </div>
+
+        <div class="form-group">
+            <label class="form-label">Subject</label>
+            <select name="subject" class="form-select" id="subjectSelect" onchange="toggleCustomSubject()">
+                <option value="">Select subject</option>
+                {% for subject in subjects %}
+                <option value="{{ subject.name }}">{{ subject.name }}</option>
+                {% endfor %}
+                <option value="Software Engineering">Software Engineering</option>
+                <option value="Programming">Programming</option>
+                <option value="Web Development">Web Development</option>
+                <option value="Data Structures">Data Structures</option>
+                <option value="Algorithms">Algorithms</option>
+                <option value="Databases">Databases</option>
+                <option value="Operating Systems">Operating Systems</option>
+                <option value="Networking">Networking</option>
+                <option value="Cybersecurity">Cybersecurity</option>
+                <option value="Machine Learning">Machine Learning</option>
+                <option value="Artificial Intelligence">Artificial Intelligence</option>
+                <option value="Math">Math</option>
+                <option value="Physics">Physics</option>
+                <option value="Chemistry">Chemistry</option>
+                <option value="English">English</option>
+                <option value="Biology">Biology</option>
+                <option value="History">History</option>
+                <option value="__custom__">➕ Add custom subject...</option>
+            </select>
+            <div id="customSubjectField" style="display: none; margin-top: 8px;">
+                <input type="text" name="custom_subject" class="form-input" placeholder="Type your custom subject name">
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label class="form-label">Priority</label>
+            <div class="priority-options">
+                <button type="button" class="priority-btn" data-priority="high" onclick="selectPriority(this)">
+                    High
+                </button>
+                <button type="button" class="priority-btn active medium" data-priority="medium" onclick="selectPriority(this)">
+                    Medium
+                </button>
+                <button type="button" class="priority-btn" data-priority="low" onclick="selectPriority(this)">
+                    Low
+                </button>
+            </div>
+            <input type="hidden" name="priority" id="priorityInput" value="medium">
+        </div>
+
+        <div class="form-group">
+            <label class="form-label">Due Date</label>
+            <input type="date" name="due_date" class="form-input" required>
+        </div>
+
+        <div class="form-group">
+            <label class="form-label">Description</label>
+            <textarea name="description" class="form-textarea" placeholder="Enter description (optional)"></textarea>
+        </div>
+
+        <div class="form-group">
+            <label class="form-label">Reminder (optional)</label>
+            <input type="datetime-local" name="reminder_time" class="form-input">
+        </div>
+
+        <div class="form-group">
+            <label class="form-label">Reminder Sound</label>
+            <select name="reminder_sound" class="form-select">
+                <option value="">None (default beep)</option>
+                {% for sound in sounds %}
+                <option value="{{ sound.file_path }}">{{ sound.name }}</option>
+                {% endfor %}
+            </select>
+            <p style="color: var(--text-muted); font-size: 12px; margin-top: 4px;">Upload custom sounds in Settings → Reminder Sounds</p>
+        </div>
+
+        <button type="submit" class="btn btn-primary btn-block">
+            <i class="fas fa-save"></i> Save Task
+        </button>
+    </form>
+</div>
+
+<script>
+function selectPriority(btn) {
+    document.querySelectorAll('.priority-btn').forEach(b => {
+        b.classList.remove('active', 'high', 'medium', 'low');
+    });
+    const priority = btn.getAttribute('data-priority');
+    btn.classList.add('active', priority);
+    document.getElementById('priorityInput').value = priority;
+}
+
+function toggleCustomSubject() {
+    const select = document.getElementById('subjectSelect');
+    const field = document.getElementById('customSubjectField');
+    if (select.value === '__custom__') {
+        field.style.display = 'block';
+        select.name = '';
+    } else {
+        field.style.display = 'none';
+        select.name = 'subject';
+    }
+}
+
+// Set default date to today
+document.querySelector('input[type="date"]').valueAsDate = new Date();
+</script>
+{% endblock %}

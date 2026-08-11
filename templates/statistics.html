@@ -1,0 +1,200 @@
+{% extends "base.html" %}
+
+{% block title %}Statistics - Study Planner{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h1>Statistics</h1>
+    <p>Track your study progress and performance</p>
+</div>
+
+<!-- Study Hours Bar Chart -->
+<div class="chart-container">
+    <div class="section-header">
+        <h2 class="section-title">Study Hours (Last 7 Days)</h2>
+        {% set total_hours = study_data|sum(attribute='total') %}
+        {% if total_hours %}
+        <span style="color: var(--text-secondary); font-size: 14px;">Total: {{ "%.1f"|format(total_hours / 60) }}h</span>
+        {% endif %}
+    </div>
+    <div style="height: 250px;">
+        <canvas id="studyHoursChart"></canvas>
+    </div>
+</div>
+
+<div style="display: grid; grid-template-columns: 1fr 1fr; gap: 24px;">
+    <!-- Task Status Donut Chart -->
+    <div class="chart-container">
+        <div class="section-header">
+            <h2 class="section-title">Task Status</h2>
+        </div>
+        <div style="height: 200px; display: flex; align-items: center; justify-content: center;">
+            <canvas id="taskStatusChart"></canvas>
+        </div>
+        <div id="taskStatusLegend" style="margin-top: 16px;"></div>
+    </div>
+
+    <!-- Subjects Donut Chart -->
+    <div class="chart-container">
+        <div class="section-header">
+            <h2 class="section-title">Tasks by Subject</h2>
+        </div>
+        <div style="height: 200px; display: flex; align-items: center; justify-content: center;">
+            <canvas id="subjectsChart"></canvas>
+        </div>
+        <div id="subjectsLegend" style="margin-top: 16px;"></div>
+    </div>
+</div>
+
+<script>
+// Study Hours Bar Chart (from real DB data)
+const studyData = [
+    {% for d in study_data %}
+    { date: '{{ d.date }}', total: {{ d.total }} },
+    {% endfor %}
+];
+
+// Build last 7 days labels with data (using LOCAL dates to match DB)
+const labels = [];
+const hoursData = [];
+const now = new Date();
+for (let i = 6; i >= 0; i--) {
+    const d = new Date(now);
+    d.setDate(d.getDate() - i);
+    const y = d.getFullYear();
+    const m = String(d.getMonth() + 1).padStart(2, '0');
+    const day = String(d.getDate()).padStart(2, '0');
+    const key = `${y}-${m}-${day}`;
+    const dayLabel = d.toLocaleDateString('en-US', { weekday: 'short' });
+    labels.push(dayLabel);
+    const match = studyData.find(s => s.date === key);
+    hoursData.push(match ? (match.total / 60) : 0);
+}
+
+const studyCtx = document.getElementById('studyHoursChart').getContext('2d');
+new Chart(studyCtx, {
+    type: 'bar',
+    data: {
+        labels: labels,
+        datasets: [{
+            label: 'Hours',
+            data: hoursData,
+            backgroundColor: '#7c3aed',
+            borderRadius: 8,
+            barThickness: 30
+        }]
+    },
+    options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: { legend: { display: false } },
+        scales: {
+            x: {
+                grid: { display: false },
+                ticks: { color: '#6c6c7f' }
+            },
+            y: {
+                grid: { color: 'rgba(255,255,255,0.05)' },
+                ticks: { color: '#6c6c7f' },
+                beginAtZero: true
+            }
+        }
+    }
+});
+
+// Task Status Donut Chart
+const taskStatusData = {
+    labels: [
+        {% for t in task_stats %}'{{ t.status|capitalize }}'{% if not loop.last %},{% endif %}
+        {% endfor %}
+    ],
+    datasets: [{
+        data: [
+            {% for t in task_stats %}{{ t.count }}{% if not loop.last %},{% endif %}
+            {% endfor %}
+        ],
+        backgroundColor: ['#7c3aed', '#3b82f6', '#10b981', '#f59e0b', '#ef4444'],
+        borderWidth: 0,
+        cutout: '60%'
+    }]
+};
+
+// Handle empty case
+if (taskStatusData.datasets[0].data.length === 0) {
+    taskStatusData.labels = ['No tasks'];
+    taskStatusData.datasets[0].data = [1];
+    taskStatusData.datasets[0].backgroundColor = ['#2d2d44'];
+}
+
+new Chart(document.getElementById('taskStatusChart'), {
+    type: 'doughnut',
+    data: taskStatusData,
+    options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: { legend: { display: false } }
+    }
+});
+
+// Legend for task status
+const taskLegend = document.getElementById('taskStatusLegend');
+taskStatusData.labels.forEach((label, index) => {
+    taskLegend.innerHTML += `
+        <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px;">
+            <div style="display: flex; align-items: center; gap: 8px;">
+                <span style="width: 12px; height: 12px; border-radius: 50%; background: ${taskStatusData.datasets[0].backgroundColor[index]};"></span>
+                <span style="color: var(--text-secondary); font-size: 14px;">${label}</span>
+            </div>
+            <span style="color: var(--text-primary); font-weight: 600; font-size: 14px;">${taskStatusData.datasets[0].data[index]}</span>
+        </div>
+    `;
+});
+
+// Subjects Donut Chart
+const subjectsData = {
+    labels: [
+        {% for s in subject_stats %}'{{ s.subject|capitalize }}'{% if not loop.last %},{% endif %}
+        {% endfor %}
+    ],
+    datasets: [{
+        data: [
+            {% for s in subject_stats %}{{ s.count }}{% if not loop.last %},{% endif %}
+            {% endfor %}
+        ],
+        backgroundColor: ['#7c3aed', '#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#06b6d4', '#ec4899', '#84cc16'],
+        borderWidth: 0,
+        cutout: '60%'
+    }]
+};
+
+if (subjectsData.datasets[0].data.length === 0) {
+    subjectsData.labels = ['No subjects'];
+    subjectsData.datasets[0].data = [1];
+    subjectsData.datasets[0].backgroundColor = ['#2d2d44'];
+}
+
+new Chart(document.getElementById('subjectsChart'), {
+    type: 'doughnut',
+    data: subjectsData,
+    options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: { legend: { display: false } }
+    }
+});
+
+// Legend for subjects
+const subjectLegend = document.getElementById('subjectsLegend');
+subjectsData.labels.forEach((label, index) => {
+    subjectLegend.innerHTML += `
+        <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px;">
+            <div style="display: flex; align-items: center; gap: 8px;">
+                <span style="width: 12px; height: 12px; border-radius: 50%; background: ${subjectsData.datasets[0].backgroundColor[index]};"></span>
+                <span style="color: var(--text-secondary); font-size: 14px;">${label}</span>
+            </div>
+            <span style="color: var(--text-primary); font-weight: 600; font-size: 14px;">${subjectsData.datasets[0].data[index]}</span>
+        </div>
+    `;
+});
+</script>
+{% endblock %}

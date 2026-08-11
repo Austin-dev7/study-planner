@@ -1,0 +1,83 @@
+{% extends "base.html" %}
+
+{% block title %}Notes - Study Planner{% endblock %}
+
+{% block content %}
+<div class="page-header" style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 16px;">
+    <div>
+        <h1>Notes</h1>
+        <p>Capture your study ideas and reminders</p>
+    </div>
+    <a href="{{ url_for('new_note') }}" class="btn btn-primary">
+        <i class="fas fa-plus"></i> New Note
+    </a>
+</div>
+
+<!-- Search Bar -->
+<form method="GET" action="{{ url_for('notes') }}" style="margin-bottom: 24px;">
+    <div style="display: flex; gap: 8px; max-width: 400px;">
+        <input type="text" name="q" value="{{ search }}" class="form-input" placeholder="Search notes...">
+        <button type="submit" class="btn btn-primary" style="padding: 0 20px;">
+            <i class="fas fa-search"></i>
+        </button>
+        {% if search %}
+        <a href="{{ url_for('notes') }}" class="btn" style="background: var(--bg-card); border: 1px solid var(--border-color); color: var(--text-secondary); padding: 0 20px;">
+            <i class="fas fa-times"></i>
+        </a>
+        {% endif %}
+    </div>
+</form>
+
+<!-- Notes Grid -->
+{% if notes %}
+<div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 20px;">
+    {% for note in notes %}
+    <div class="note-card">
+        <div class="note-card-header">
+            <h3 class="note-card-title">{{ note.title }}</h3>
+            <div style="display: flex; gap: 8px;">
+                <a href="{{ url_for('edit_note', note_id=note.id) }}" 
+                   style="color: var(--accent-purple-light); font-size: 15px; text-decoration: none;"
+                   title="Edit note">
+                    <i class="fas fa-edit"></i>
+                </a>
+<form method="POST" action="{{ url_for('delete_note', note_id=note.id) }}" 
+                      style="display: inline;" onsubmit="return confirm('Delete this note?');">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                    <button type="submit" style="background: none; border: none; color: var(--danger); font-size: 15px; cursor: pointer;" title="Delete note">
+                        <i class="fas fa-trash"></i>
+                    </button>
+                </form>
+            </div>
+        </div>
+        <div class="note-card-content">
+            {% if note.content %}
+                {{ note.content[:150] }}{% if note.content|length > 150 %}...{% endif %}
+            {% else %}
+                <span style="color: var(--text-muted);">No content</span>
+            {% endif %}
+        </div>
+        <div class="note-card-footer">
+            <i class="fas fa-clock"></i>
+            <span>Updated {{ note.updated_at[:10] }}</span>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+{% else %}
+<div class="chart-container" style="text-align: center; padding: 60px 20px;">
+    <i class="fas fa-sticky-note" style="font-size: 48px; color: var(--text-muted); margin-bottom: 16px;"></i>
+    <p style="color: var(--text-secondary); font-size: 16px;">
+        {% if search %}
+            No notes found matching "{{ search }}"
+        {% else %}
+            You don't have any notes yet
+        {% endif %}
+    </p>
+    <a href="{{ url_for('new_note') }}" style="color: var(--accent-purple-light); margin-top: 8px; display: inline-block;">
+        Create your first note
+    </a>
+</div>
+{% endif %}
+{% endblock %}
+

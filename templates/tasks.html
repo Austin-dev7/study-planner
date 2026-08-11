@@ -1,0 +1,104 @@
+{% extends "base.html" %}
+
+{% block title %}Tasks - Study Planner{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h1>Tasks</h1>
+</div>
+
+<!-- Filter Tabs -->
+<div style="display: flex; gap: 8px; margin-bottom: 24px; overflow-x: auto;">
+    <a href="{{ url_for('tasks', status='all') }}" 
+       class="btn {% if current_filter == 'all' %}btn-primary{% else %}" style="background: var(--bg-card); border: 1px solid var(--border-color); color: var(--text-secondary);{% endif %}">
+        All
+    </a>
+    <a href="{{ url_for('tasks', status='pending') }}" 
+       class="btn {% if current_filter == 'pending' %}btn-primary{% else %}" style="background: var(--bg-card); border: 1px solid var(--border-color); color: var(--text-secondary);{% endif %}">
+        Pending
+    </a>
+    <a href="{{ url_for('tasks', status='in_progress') }}" 
+       class="btn {% if current_filter == 'in_progress' %}btn-primary{% else %}" style="background: var(--bg-card); border: 1px solid var(--border-color); color: var(--text-secondary);{% endif %}">
+        In Progress
+    </a>
+    <a href="{{ url_for('tasks', status='completed') }}" 
+       class="btn {% if current_filter == 'completed' %}btn-primary{% else %}" style="background: var(--bg-card); border: 1px solid var(--border-color); color: var(--text-secondary);{% endif %}">
+        Done
+    </a>
+</div>
+
+<!-- Task List -->
+<div class="task-list">
+    {% if tasks %}
+        {% for task in tasks %}
+        <div class="task-item" data-task-id="{{ task.id }}">
+            <div class="task-icon" style="background: rgba(124, 58, 237, 0.2); color: var(--accent-purple-light);">
+                <i class="fas fa-book"></i>
+            </div>
+            <div class="task-info">
+                <div class="task-title">{{ task.title }}</div>
+                <div class="task-meta">
+                    <span><i class="fas fa-book"></i> {{ task.subject }}</span>
+                    <span><i class="fas fa-calendar"></i> {{ task.due_date }}</span>
+                </div>
+            </div>
+            <span class="priority-badge priority-{{ task.priority }}">{{ task.priority }}</span>
+            <div style="display: flex; gap: 8px;">
+                <a href="{{ url_for('edit_task', task_id=task.id) }}" style="background: var(--accent-purple); border: none; color: white; padding: 8px 12px; border-radius: 8px; cursor: pointer; font-size: 12px; text-decoration: none;">
+                    <i class="fas fa-edit"></i>
+                </a>
+                {% if task.status != 'completed' %}
+                <button onclick="completeTask({{ task.id }})" style="background: var(--success); border: none; color: white; padding: 8px 12px; border-radius: 8px; cursor: pointer; font-size: 12px;">
+                    <i class="fas fa-check"></i>
+                </button>
+                {% endif %}
+                <button onclick="deleteTask({{ task.id }})" style="background: var(--danger); border: none; color: white; padding: 8px 12px; border-radius: 8px; cursor: pointer; font-size: 12px;">
+                    <i class="fas fa-trash"></i>
+                </button>
+            </div>
+        </div>
+        {% endfor %}
+    {% else %}
+        <div style="text-align: center; padding: 60px 20px;">
+            <i class="fas fa-clipboard-list" style="font-size: 48px; color: var(--text-muted); margin-bottom: 16px;"></i>
+            <p style="color: var(--text-secondary); font-size: 16px;">No tasks found</p>
+            <a href="{{ url_for('add_task') }}" style="color: var(--accent-purple-light); margin-top: 8px; display: inline-block;">Add your first task</a>
+        </div> 
+    {% endif %}
+</div>
+
+<!-- Add Task Button -->
+<a href="{{ url_for('add_task') }}" class="btn-add">
+    <i class="fas fa-plus"></i>
+</a>
+
+<script>
+function completeTask(taskId) {
+    fetch(`/api/tasks/${taskId}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ status: 'completed' })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            location.reload();
+        }
+    });
+}
+
+function deleteTask(taskId) {
+    if (confirm('Are you sure you want to delete this task?')) {
+        fetch(`/api/tasks/${taskId}`, {
+            method: 'DELETE'
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                location.reload();
+            }
+        });
+    }
+}
+</script>
+{% endblock %}

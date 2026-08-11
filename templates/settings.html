@@ -1,0 +1,212 @@
+{% extends "base.html" %}
+
+{% block title %}Settings - Study Planner{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h1>Settings</h1>
+    <p>Manage your account preferences</p>
+</div>
+
+{% if message %}
+<div class="alert alert-{{ message_type }}" style="margin-bottom: 24px;">
+    <i class="fas fa-{% if message_type == 'success' %}check-circle{% else %}exclamation-circle{% endif %}"></i>
+    {{ message }}
+</div>
+{% endif %}
+
+<div style="max-width: 720px;">
+    <!-- Profile Section -->
+    <div class="chart-container">
+        <div class="section-header">
+            <h2 class="section-title"><i class="fas fa-user"></i> Profile</h2>
+        </div>
+<form method="POST" action="{{ url_for('settings') }}">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            <input type="hidden" name="action" value="profile">
+            <div class="form-group">
+                <label class="form-label">Full Name</label>
+                <input type="text" name="name" class="form-input" value="{{ user.name }}" required>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Email</label>
+                <input type="email" name="email" class="form-input" value="{{ user.email }}" required>
+            </div>
+            <button type="submit" class="btn btn-primary">
+                <i class="fas fa-save"></i> Update Profile
+            </button>
+        </form>
+    </div>
+
+    <!-- My Subjects Section -->
+    <div class="chart-container">
+        <div class="section-header">
+            <h2 class="section-title"><i class="fas fa-book"></i> My Subjects</h2>
+        </div>
+        <div id="subjectList" style="margin-bottom: 16px;">
+            {% for subject in subjects %}
+            <div style="display: flex; align-items: center; justify-content: space-between; padding: 10px 14px; background: var(--bg-secondary); border-radius: 8px; margin-bottom: 8px;">
+                <div style="display: flex; align-items: center; gap: 10px;">
+                    <span style="width: 10px; height: 10px; border-radius: 50%; background: {{ subject.color }};"></span>
+                    <span style="font-weight: 500;">{{ subject.name }}</span>
+                </div>
+                <button onclick="deleteSubject({{ subject.id }})" style="background: none; border: none; color: var(--danger); cursor: pointer; font-size: 14px;">
+                    <i class="fas fa-trash"></i>
+                </button>
+            </div>
+            {% endfor %}
+            {% if not subjects %}
+            <p style="color: var(--text-muted); font-size: 14px;">No custom subjects yet. Add one below!</p>
+            {% endif %}
+        </div>
+<form method="POST" action="{{ url_for('settings') }}" style="display: flex; gap: 8px;">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            <input type="hidden" name="action" value="add_subject">
+            <input type="text" name="subject_name" class="form-input" placeholder="New subject name" required style="flex: 1;">
+            <input type="color" name="subject_color" value="#7C3AED" style="width: 48px; height: 48px; background: var(--bg-secondary); border: 1px solid var(--border-color); border-radius: 8px; cursor: pointer;">
+            <button type="submit" class="btn btn-primary" style="padding: 0 20px;">
+                <i class="fas fa-plus"></i> Add
+            </button>
+        </form>
+    </div>
+
+    <!-- Reminder Sounds Section -->
+    <div class="chart-container">
+        <div class="section-header">
+            <h2 class="section-title"><i class="fas fa-music"></i> Reminder Sounds</h2>
+        </div>
+        <div id="soundList" style="margin-bottom: 16px;">
+            {% for sound in sounds %}
+            <div style="display: flex; align-items: center; justify-content: space-between; padding: 10px 14px; background: var(--bg-secondary); border-radius: 8px; margin-bottom: 8px;">
+                <div style="display: flex; align-items: center; gap: 10px;">
+                    <button onclick="playSound('{{ url_for('static', filename=sound.file_path) }}')" style="background: none; border: none; color: var(--accent-purple-light); cursor: pointer; font-size: 14px;">
+                        <i class="fas fa-play"></i>
+                    </button>
+                    <span style="font-weight: 500;">{{ sound.name }}</span>
+                </div>
+                <button onclick="deleteSound({{ sound.id }})" style="background: none; border: none; color: var(--danger); cursor: pointer; font-size: 14px;">
+                    <i class="fas fa-trash"></i>
+                </button>
+            </div>
+            {% endfor %}
+            {% if not sounds %}
+            <p style="color: var(--text-muted); font-size: 14px;">No custom sounds yet. Upload your own reminder sound below!</p>
+            {% endif %}
+        </div>
+        <form id="soundUploadForm" style="display: flex; gap: 8px; flex-wrap: wrap;">
+            <input type="text" id="soundName" class="form-input" placeholder="Sound name" style="flex: 1; min-width: 140px;">
+            <input type="file" id="soundFile" accept=".mp3,.wav,.ogg,.m4a,.aac" class="form-input" style="flex: 1; min-width: 160px;">
+            <button type="button" onclick="uploadSound()" class="btn btn-primary" style="padding: 0 20px;">
+                <i class="fas fa-upload"></i> Upload
+            </button>
+        </form>
+    </div>
+
+    <!-- Password Section -->
+    <div class="chart-container">
+        <div class="section-header">
+            <h2 class="section-title"><i class="fas fa-lock"></i> Change Password</h2>
+        </div>
+<form method="POST" action="{{ url_for('settings') }}">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            <input type="hidden" name="action" value="password">
+            <div class="form-group">
+                <label class="form-label">Current Password</label>
+                <input type="password" name="current_password" class="form-input" placeholder="Enter current password" required>
+            </div>
+            <div class="form-group">
+                <label class="form-label">New Password</label>
+                <input type="password" name="new_password" class="form-input" placeholder="Enter new password (min 6 characters)" required>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Confirm New Password</label>
+                <input type="password" name="confirm_password" class="form-input" placeholder="Re-enter new password" required>
+            </div>
+            <button type="submit" class="btn btn-primary">
+                <i class="fas fa-key"></i> Change Password
+            </button>
+        </form>
+    </div>
+
+    <!-- Danger Zone -->
+    <div class="chart-container" style="border-color: rgba(239, 68, 68, 0.3);">
+        <div class="section-header">
+            <h2 class="section-title" style="color: var(--danger);"><i class="fas fa-exclamation-triangle"></i> Danger Zone</h2>
+        </div>
+        <p style="color: var(--text-secondary); font-size: 14px; margin-bottom: 16px;">
+            Deleting your account will permanently remove all your tasks, notes, subjects, and study data. This action cannot be undone.
+        </p>
+<form method="POST" action="{{ url_for('settings') }}" onsubmit="return confirm('Are you absolutely sure? This will permanently delete your account and all data. This cannot be undone!');">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            <input type="hidden" name="action" value="delete">
+            <div class="form-group">
+                <label class="form-label">Type your email <span style="color: var(--accent-purple-light);">{{ user.email }}</span> to confirm</label>
+                <input type="email" name="confirm_email" class="form-input" placeholder="Enter your email to confirm" required>
+            </div>
+            <button type="submit" style="background: var(--danger); border: none; color: white; padding: 14px 28px; border-radius: 8px; font-size: 15px; font-weight: 600; cursor: pointer; display: inline-flex; align-items: center; gap: 8px;">
+                <i class="fas fa-trash"></i> Delete My Account
+            </button>
+        </form>
+    </div>
+</div>
+
+<script>
+// Delete subject
+function deleteSubject(id) {
+    if (!confirm('Delete this subject?')) return;
+    fetch(`/api/subjects/${id}/delete`, { method: 'POST' })
+        .then(r => r.json())
+        .then(d => { if (d.success) location.reload(); });
+}
+
+// Play a reminder sound preview
+let audioPreview = null;
+function playSound(fileUrl) {
+    if (audioPreview) {
+        audioPreview.pause();
+        audioPreview = null;
+    }
+    audioPreview = new Audio(fileUrl);
+    audioPreview.play();
+}
+
+// Delete sound
+function deleteSound(id) {
+    if (!confirm('Delete this sound?')) return;
+    fetch(`/api/sounds/${id}/delete`, { method: 'POST' })
+        .then(r => r.json())
+        .then(d => { if (d.success) location.reload(); });
+}
+
+// Upload sound
+function uploadSound() {
+    const nameInput = document.getElementById('soundName');
+    const fileInput = document.getElementById('soundFile');
+
+    const name = nameInput.value.trim() || 'My Sound';
+    const file = fileInput.files[0];
+
+    if (!file) {
+        alert('Please choose an audio file first.');
+        return;
+    }
+
+    const formData = new FormData();
+    formData.append('name', name);
+    formData.append('sound', file);
+
+    fetch('/api/sounds/upload', { method: 'POST', body: formData })
+        .then(r => r.json())
+        .then(d => {
+            if (d.error) {
+                alert(d.error);
+            } else {
+                alert('Sound uploaded successfully!');
+                location.reload();
+            }
+        })
+        .catch(() => alert('Upload failed. Please try again.'));
+}
+</script>
+{% endblock %}
+

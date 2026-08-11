@@ -1,0 +1,117 @@
+{% extends "base.html" %}
+
+{% block title %}Login - Study Planner{% endblock %}
+
+{% block content %}
+<div class="login-container">
+    <div class="login-box">
+        <div class="login-logo">
+            <i class="fas fa-graduation-cap"></i>
+        </div>
+        <h1 class="login-title">StudyPlanner</h1>
+        <p class="login-subtitle">Plan. Study. Achieve.</p>
+
+        {% if error %}
+        <div class="error-message">
+            <i class="fas fa-exclamation-circle"></i> {{ error }}
+        </div>
+        {% endif %}
+
+<form method="POST" action="{{ url_for('login') }}">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            <div class="form-group">
+                <label class="form-label">Email</label> 
+                <input type="email" name="email" class="form-input" placeholder="Enter your email" required> 
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">Password</label>
+                <input type="password" name="password" class="form-input" placeholder="Enter your password" required>
+            </div>
+
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px;">
+                <label style="display: flex; align-items: center; gap: 8px; color: var(--text-secondary); font-size: 14px; cursor: pointer;">
+                    <input type="checkbox" name="remember" style="accent-color: var(--accent-purple);">
+                    Remember me
+                </label>
+                <a href="#" style="color: var(--accent-purple-light); font-size: 14px;">Forgot password?</a>
+            </div>
+
+            <button type="submit" class="btn btn-primary btn-block">
+                Login
+            </button>
+        </form>
+
+        <div class="divider">or continue with</div>
+
+        <div class="social-login">
+            <button class="social-btn" onclick="alert('Google OAuth coming soon!')">
+                <i class="fab fa-google"></i>
+                Google
+            </button>
+            <button class="social-btn" onclick="alert('GitHub OAuth coming soon!')">
+                <i class="fab fa-github"></i>
+                GitHub
+            </button>
+        </div>
+
+        <p style="color: var(--text-secondary); font-size: 14px; margin-top: 24px;">
+            Don't have an account? 
+            <a href="#" onclick="toggleRegister()" style="color: var(--accent-purple-light); font-weight: 600;">Sign up</a>
+        </p>
+    </div>
+</div>
+
+<!-- Hidden Register Form -->
+<div id="registerForm" class="login-container" style="display: none;">
+    <div class="login-box">
+        <div class="login-logo">
+            <i class="fas fa-graduation-cap"></i>
+        </div>
+        <h1 class="login-title">Create Account</h1>
+        <p class="login-subtitle">Start your learning journey</p>
+
+        <form method="POST" action="{{ url_for('register') }}">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            <div class="form-group">
+                <label class="form-label">Full Name</label>
+                <input type="text" name="name" class="form-input" placeholder="Enter your name" required>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">Email</label>
+                <input type="email" name="email" class="form-input" placeholder="Enter your email" required>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">Password</label>
+                <input type="password" name="password" class="form-input" placeholder="Create a password" required>
+            </div>
+
+            <button type="submit" class="btn btn-primary btn-block">
+                Sign Up
+            </button>
+        </form>
+
+        <p style="color: var(--text-secondary); font-size: 14px; margin-top: 24px;">
+            Already have an account? 
+            <a href="#" onclick="toggleRegister()" style="color: var(--accent-purple-light); font-weight: 600;">Login</a>
+        </p>
+    </div>
+</div>
+
+<script>
+function toggleRegister() {
+    const loginForm = document.querySelector('.login-container');
+    const registerForm = document.getElementById('registerForm');
+
+    if (registerForm.style.display === 'none') {
+        loginForm.style.display = 'none';
+        registerForm.style.display = 'flex';
+    } else {
+        loginForm.style.display = 'flex';
+        registerForm.style.display = 'none';
+    }
+}
+</script>
+{% endblock %}
