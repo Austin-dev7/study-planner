@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Study Planner - Plan. Study. Achieve.</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --bg-primary: #0f0f1a;
+            --bg-secondary: #1a1a2e;
+            --bg-card: #16213e;
+            --text-primary: #ffffff;
+            --text-secondary: #a0a0b0;
+            --text-muted: #6c6c7f;
+            --accent-purple: #7c3aed;
+            --accent-purple-light: #a855f7;
+            --accent-purple-dark: #5b21b6;
+            --success: #10b981;
+            --border-color: #2d2d44;
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg-primary);
+            color: var(--text-primary);
+            line-height: 1.6;
+            overflow-x: hidden;
+        }
+        .container { max-width: 1200px; margin: 0 auto; padding: 0 24px; }
+
+        .navbar {
+            position: fixed; top: 0; left: 0; right: 0;
+            background: rgba(15, 15, 26, 0.9);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid var(--border-color);
+            z-index: 1000;
+            padding: 16px 0;
+        }
+        .navbar .container {
+            display: flex; align-items: center; justify-content: space-between;
+        }
+        .nav-logo {
+            display: flex; align-items: center; gap: 12px;
+            font-size: 20px; font-weight: 700; color: var(--accent-purple-light);
+        }
+        .nav-logo i { font-size: 28px; }
+        .nav-links { display: flex; gap: 32px; align-items: center; }
+        .nav-links a {
+            color: var(--text-secondary); text-decoration: none;
+            font-size: 15px; font-weight: 500; transition: color 0.3s;
+        }
+        .nav-links a:hover { color: var(--text-primary); }
+        .nav-btn {
+            padding: 10px 24px; border-radius: 8px; font-size: 14px;
+            font-weight: 600; cursor: pointer; transition: all 0.3s; border: none;
+            text-decoration: none;
+        }
+        .nav-btn-outline {
+            background: transparent; border: 1px solid var(--border-color);
+            color: var(--text-primary);
+        }
+        .nav-btn-outline:hover { border-color: var(--accent-purple); }
+        .nav-btn-primary {
+            background: linear-gradient(135deg, var(--accent-purple), var(--accent-purple-dark));
+            color: white;
+        }
+        .nav-btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(124, 58, 237, 0.4);
+        }
+
+        .hero {
+            padding: 160px 0 100px;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+        .hero::before {
+            content: ''; position: absolute; top: -50%; left: -50%;
+            width: 200%; height: 200%;
+            background: radial-gradient(circle at 50% 50%, rgba(124, 58, 237, 0.08) 0%, transparent 50%);
+            pointer-events: none;
+        }
+        .hero h1 {
+            font-size: 56px; font-weight: 800; margin-bottom: 20px;
+            background: linear-gradient(135deg, #fff, #a855f7);
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        .hero p {
+            font-size: 20px; color: var(--text-secondary);
+            max-width: 600px; margin: 0 auto 40px;
+        }
+        .hero-btns { display: flex; gap: 16px; justify-content: center; }
+        .hero-btn {
+            padding: 16px 32px; border-radius: 12px; font-size: 16px;
+            font-weight: 600; cursor: pointer; transition: all 0.3s;
+            text-decoration: none; display: inline-flex; align-items: center; gap: 10px;
+        }
+        .hero-btn-primary {
+            background: linear-gradient(135deg, var(--accent-purple), var(--accent-purple-dark));
+            color: white; border: none;
+            box-shadow: 0 4px 20px rgba(124, 58, 237, 0.4);
+        }
+        .hero-btn-primary:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 30px rgba(124, 58, 237, 0.5);
+        }
+        .hero-btn-secondary {
+            background: var(--bg-card); color: var(--text-primary);
+            border: 1px solid var(--border-color);
+        }
+        .hero-btn-secondary:hover { border-color: var(--accent-purple); }
+
+        .badge {
+            display: inline-flex; align-items: center; gap: 8px;
+            background: rgba(124, 58, 237, 0.15); border: 1px solid rgba(124, 58, 237, 0.3);
+            color: var(--accent-purple-light); padding: 8px 16px; border-radius: 20px;
+            font-size: 13px; font-weight: 600; margin-bottom: 24px;
+        }
+
+        .features { padding: 80px 0; }
+        .section-title {
+            text-align: center; font-size: 36px; font-weight: 700; margin-bottom: 16px;
+        }
+        .section-subtitle {
+            text-align: center; color: var(--text-secondary); font-size: 18px;
+            margin-bottom: 60px;
+        }
+        .features-grid {
+            display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 24px;
+        }
+        .feature-card {
+            background: var(--bg-card); border: 1px solid var(--border-color);
+            border-radius: 16px; padding: 32px; transition: all 0.3s;
+        }
+        .feature-card:hover {
+            transform: translateY(-4px);
+            border-color: var(--accent-purple);
+            box-shadow: 0 8px 30px rgba(0,0,0,0.3);
+        }
+        .feature-icon {
+            width: 56px; height: 56px; border-radius: 14px;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 24px; margin-bottom: 20px;
+        }
+        .feature-icon.purple { background: rgba(124, 58, 237, 0.2); color: var(--accent-purple-light); }
+        .feature-icon.green { background: rgba(16, 185, 129, 0.2); color: var(--success); }
+        .feature-icon.blue { background: rgba(59, 130, 246, 0.2); color: #3b82f6; }
+        .feature-icon.orange { background: rgba(245, 158, 11, 0.2); color: #f59e0b; }
+        .feature-icon.red { background: rgba(239, 68, 68, 0.2); color: #ef4444; }
+        .feature-icon.cyan { background: rgba(6, 182, 212, 0.2); color: #06b6d4; }
+        .feature-card h3 { font-size: 20px; font-weight: 600; margin-bottom: 12px; }
+        .feature-card p { color: var(--text-secondary); font-size: 15px; line-height: 1.6; }
+
+        .tech-stack { padding: 60px 0; text-align: center; border-top: 1px solid var(--border-color); }
+        .tech-stack h3 { font-size: 14px; color: var(--text-muted); margin-bottom: 24px; text-transform: uppercase; letter-spacing: 1px; }
+        .tech-badges { display: flex; gap: 16px; justify-content: center; flex-wrap: wrap; }
+        .tech-badge {
+            background: var(--bg-card); border: 1px solid var(--border-color);
+            padding: 10px 20px; border-radius: 8px; font-size: 14px;
+            color: var(--text-secondary); font-weight: 500;
+        }
+
+        .footer {
+            padding: 40px 0; text-align: center;
+            border-top: 1px solid var(--border-color);
+            color: var(--text-muted); font-size: 14px;
+        }
+
+        @media (max-width: 768px) {
+            .hero h1 { font-size: 36px; }
+            .hero p { font-size: 16px; }
+            .nav-links { display: none; }
+            .hero-btns { flex-direction: column; align-items: center; }
+            .features-grid { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+        <div class="container">
+            <div class="nav-logo">
+                <i class="fas fa-graduation-cap"></i>
+                StudyPlanner
+            </div>
+            <div class="nav-links">
+                <a href="#features">Features</a>
+                <a href="/login" class="nav-btn nav-btn-outline">Log In</a>
+                <a href="/demo" class="nav-btn nav-btn-primary">Try Demo</a>
+            </div>
+        </div>
+    </nav>
+
+    <section class="hero">
+        <div class="container">
+            <div class="badge">
+                <i class="fas fa-sparkles"></i>
+                Free & Open Source
+            </div>
+            <h1>Your Personal Study<br>Command Center</h1>
+            <p>Track tasks, manage deadlines, take notes, and visualize your study progress — all in one beautiful, distraction-free app.</p>
+            <div class="hero-btns">
+                <a href="/demo" class="hero-btn hero-btn-primary">
+                    <i class="fas fa-rocket"></i>
+                    Try Live Demo
+                </a>
+                <a href="https://github.com/Austin-dev7/study-planner" target="_blank" class="hero-btn hero-btn-secondary">
+                    <i class="fab fa-github"></i>
+                    View on GitHub
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <section class="features" id="features">
+        <div class="container">
+            <h2 class="section-title">Everything You Need to Succeed</h2>
+            <p class="section-subtitle">A complete toolkit designed for students and self-learners.</p>
+            <div class="features-grid">
+                <div class="feature-card">
+                    <div class="feature-icon purple"><i class="fas fa-tasks"></i></div>
+                    <h3>Smart Task Management</h3>
+                    <p>Create, prioritize, and track tasks with due dates and reminders. Filter by status to stay organized.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon green"><i class="fas fa-chart-line"></i></div>
+                    <h3>Progress Analytics</h3>
+                    <p>Visualize your study habits with charts. Track completion rates, weekly focus hours, and subject distribution.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon blue"><i class="fas fa-calendar-alt"></i></div>
+                    <h3>Study Calendar</h3>
+                    <p>Monthly overview with task indicators. Plan ahead and never miss a deadline again.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon orange"><i class="fas fa-sticky-note"></i></div>
+                    <h3>Quick Notes</h3>
+                    <p>Take, search, and organize study notes. Everything you learn, saved in one place.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon red"><i class="fas fa-bell"></i></div>
+                    <h3>Custom Reminders</h3>
+                    <p>Set reminder times with custom sounds. Get notified when it's time to study.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon cyan"><i class="fas fa-mobile-alt"></i></div>
+                    <h3>Fully Responsive</h3>
+                    <p>Works seamlessly on desktop, tablet, and mobile. Study anywhere, anytime.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="tech-stack">
+        <div class="container">
+            <h3>Built With</h3>
+            <div class="tech-badges">
+                <span class="tech-badge">Python</span>
+                <span class="tech-badge">Flask</span>
+                <span class="tech-badge">SQLite / PostgreSQL</span>
+                <span class="tech-badge">HTML5</span>
+                <span class="tech-badge">CSS3</span>
+                <span class="tech-badge">JavaScript</span>
+                <span class="tech-badge">Chart.js</span>
+            </div>
+        </div>
+    </section>
+
+    <footer class="footer">
+        <div class="container">
+            <p>Built by Austin-dev7. Open source under MIT License.</p>
+        </div>
+    </footer>
+</body>
+</html>

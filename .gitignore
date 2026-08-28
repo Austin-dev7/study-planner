@@ -30,7 +30,7 @@ wheels/
 *.db
 *.db.bak
 *.sqlite
-*.sqlite3
+*.sqlite3 
 
 # Uploaded user files
 static/uploads/

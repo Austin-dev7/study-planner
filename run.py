@@ -32,7 +32,7 @@ if __name__ == '__main__':
     print('  STUDY PLANNER - Starting local server...')
     print('=' * 50)
     print(f'  Local URL:  http://{HOST}:{PORT}')
-    print('  Press CTRL+C to stop the server')
+    print('  Press CTRL+C to stop the server') 
     print('=' * 50)          
 
     # Open the browser automatically after a short delay

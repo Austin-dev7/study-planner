@@ -393,8 +393,8 @@ Contributions are welcome! Please read the [Contributing Guidelines](CONTRIBUTIN
 - Automated goal tracking
 - Advanced analytics and reporting
 - Browser notifications for reminders
-- Data backup and export (JSON/CSV)
-- Recurring task support
+- Data backup and export (JSON/CSV)     
+- Recurring task support 
 
 ---
 
