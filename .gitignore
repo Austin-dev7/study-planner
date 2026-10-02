@@ -26,6 +26,9 @@ wheels/
 .installed.cfg
 *.egg
 
+# Vercel
+.vercel/
+
 # Database files (contain user data - DO NOT COMMIT)
 *.db
 *.db.bak
@@ -61,3 +64,5 @@ htmlcov/
 .tox/
 .nox/
 .pytest_cache/
+.vercel
+.env*
