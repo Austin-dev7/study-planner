@@ -43,7 +43,6 @@ The application provides:
 - New account registration
 - Password change and account deletion (with confirmation)
 - Passwords stored as secure hashes using Werkzeug
-- Development auto-login route at `/auto-login`
 
 ### Dashboard
 
@@ -105,7 +104,7 @@ Full CRUD operations for tasks:
 
 | Technology | Purpose |
 |---|---|
-| Python 3.14 | Programming language |
+| Python 3.12+ | Programming language |
 | Flask 3.1 | Web framework |
 | SQLite | Local development database |
 | PostgreSQL | Production database (Vercel / Neon) |
@@ -133,124 +132,87 @@ Full CRUD operations for tasks:
 1. Clone or download the repository and navigate to the project directory:
 
 ```bash
-git clone https://github.com/yourusername/study-planner.git
+git clone https://github.com/Austin-dev7/study-planner.git
 cd study-planner
 ```
 
-2. Create and activate a virtual environment (recommended):
-
-**Windows**
+2. Create and activate a virtual environment:
 
 ```bash
 python -m venv venv
+```
+
+**Windows:**
+
+```bash
 venv\Scripts\activate
 ```
 
-**macOS / Linux**
+**macOS / Linux:**
 
 ```bash
-python3 -m venv venv
 source venv/bin/activate
 ```
 
-3. Install dependencies:
+3. Install the dependencies:
 
 ```bash
 pip install -r requirements.txt
 ```
 
----
-
-## Running the Application
-
-### Option 1: One-Click Launcher
-
-The `run.py` script starts the server and automatically opens the default browser:
+4. Start the application:
 
 ```bash
 python run.py
 ```
 
-### Option 2: Standard Flask Server
+The app opens automatically in your browser at `http://127.0.0.1:5000`.
 
-```bash
-python app.py
-```
+---
 
-### Access
+## Running the Application
 
-Once the server is running, open your browser at:
-
-```
-http://127.0.0.1:5000
-```
-
-The server binds to `0.0.0.0:5000`, so other devices on the same network can also access the app using your computer's IP address and port 5000.
-
-> Note: Run only one of the commands above at a time. Starting a second server while one is active will result in a port conflict.
+| Command | Purpose |
+|---|---|
+| `python run.py` | Start the server and open the browser |
+| `python run_tests.py` | Run the smoke test suite |
+| `python set_password.py` | Set a user's password from the command line |
+| `python reset_user_password.py` | Reset a forgotten password |
 
 ---
 
 ## Creating a User Account
 
-All passwords are stored as secure hashes. Do not commit real email addresses or passwords to a public repository.
+1. Open `http://127.0.0.1:5000`
+2. Click **Register**
+3. Enter a name, email address, and a password of at least 6 characters
+4. Log in with those credentials
 
-To create a user or reset a password locally, use the helper script:
+### Demo Account
 
-```bash
-python set_password.py your@email.com YourTemporaryPassword
-```
+A pre-seeded demo account is available for trying the app without registering:
 
-Alternatively, register directly through the application's "Sign up" link on the login page.
+- **Email:** `demo@studyplanner.app`
+- **Password:** `demo123`
+
+Or visit `/demo` to sign in instantly.
+
+> **Note:** On Vercel without a configured database, demo data is regenerated on
+> every cold start, so any changes you make are temporary.
 
 ---
 
 ## Usage Guide
 
-### Getting Started
+1. **Dashboard** — review today's tasks, completed work, study hours, and upcoming deadlines
+2. **Tasks** — add, edit, filter, complete, or delete tasks
+3. **Calendar** — browse your month and spot busy days
+4. **Statistics** — review weekly study hours, task status, and subject distribution
+5. **Notes** — capture and search study notes
+6. **Settings** — update your profile, change your password, manage subjects, and upload reminder sounds
 
-1. Start the application with `python run.py`.
-2. Open `http://127.0.0.1:5000` in your browser.
-3. Log in with your credentials, or click "Sign up" to create a new account.
-4. You will be redirected to the Dashboard.
-
-### Adding a Task
-
-1. Click **Tasks** in the sidebar.
-2. Click the floating **+** (Add) button.
-3. Enter task details (title, subject, priority, due date, optional description and reminder).
-4. Click **Save Task**.
-
-### Completing a Task
-
-On the Tasks page, click the green check button next to a task. Its status updates to "Completed".
-
-### Taking Notes
-
-1. Click **Notes** in the sidebar.
-2. Select **New Note**.
-3. Enter a title and content, then save.
-
-### Setting a Reminder
-
-1. When adding or editing a task, set a reminder time (date and time).
-2. Choose a reminder sound, or upload your own in Settings.
-3. Save the task. The application will notify you when the reminder time arrives.
-
-### Managing Subjects
-
-1. Navigate to **Settings -> My Subjects**.
-2. Add a subject with a name and color.
-3. Delete subjects no longer needed.
-
-### Recommended Daily Workflow
-
-1. Morning: Open the Dashboard and review tasks due today.
-2. Review prioritized pending tasks.
-3. Complete tasks as they are finished and track progress.
-4. Take notes during study sessions.
-5. Plan upcoming tasks and deadlines.
-6. Evening: Review Statistics to monitor progress.
+Log study time from the dashboard using the **Log Study Time** button to feed the
+weekly statistics chart.
 
 ---
 
@@ -258,152 +220,103 @@ On the Tasks page, click the green check button next to a task. Its status updat
 
 ```
 study-planner/
-├── app.py                    # Main Flask application (routes and logic)
+├── app.py                  # Flask application, routes, and database layer
 ├── api/
-│   └── index.py              # Vercel serverless entry point
-├── run.py                    # One-click launcher (server + browser)
-├── set_password.py           # Password reset helper script
-├── create_test_user.py       # Creates a test user (optional)
-├── show_users.py             # Debug tool to list database users
-├── reset_user_password.py    # Resets a user's password (with backup)
-├── vercel.json               # Vercel deployment config
-├── requirements.txt          # Python dependencies
-├── study_planner.db          # SQLite database (local only)
-├── README.md                 # Project documentation
-├── LICENSE                   # MIT License
-├── CONTRIBUTING.md           # Contribution guidelines
-├── CODE_OF_CONDUCT.md        # Community code of conduct
+│   └── index.py            # Vercel serverless entry point
+├── templates/              # Jinja2 HTML templates
 ├── static/
-│   ├── css/
-│   │   └── style.css         # Application styling
-│   ├── js/
-│   │   └── main.js           # Frontend interactivity
-│   ├── images/               # Application images
-│   └── uploads/
-│       └── sounds/           # User-uploaded reminder sounds
-└── templates/
-    ├── base.html             # Base layout
-    ├── login.html            # Login and registration
-    ├── dashboard.html        # Dashboard
-    ├── tasks.html            # Task list
-    ├── add_task.html         # Create task
-    ├── edit_task.html        # Edit task
-    ├── calendar.html         # Calendar view
-    ├── statistics.html       # Statistics and charts
-    ├── notes.html            # Notes list
-    ├── new_note.html         # Create note
-    ├── edit_note.html        # Edit note
-    └── settings.html         # Settings panel
+│   ├── css/style.css       # Stylesheet
+│   └── js/main.js          # Frontend logic
+├── run.py                  # Local launcher
+├── run_tests.py            # Smoke tests
+├── set_password.py         # CLI password setter
+├── reset_user_password.py  # CLI password reset
+├── vercel.json             # Vercel build configuration
+└── requirements.txt
 ```
 
 ---
 
 ## Troubleshooting
 
-### "can't open file 'run'" error
-
-This occurs when the command is entered as `python run app.py` instead of `python run.py`. Always include the `.py` extension.
-
-### Application skips the login page
-
-The application is skipping the login page because a session is already active. To log out, visit:
-
-```
-http://127.0.0.1:5000/logout
-```
-
-Then open the application root again to reach the login page.
-
-### Port 5000 already in use
-
-A port conflict occurs when another server instance is already running. Stop the existing server, or open `http://127.0.0.1:5000` directly in the browser to use the running instance.
-
-### "Invalid email or password"
-
-- Verify the email and password are correct (they are case-sensitive).
-- Reset the password using the helper script:
+**`RuntimeError: SECRET_KEY environment variable must be set in production`**
+Set a `SECRET_KEY` environment variable. Generate one with:
 
 ```bash
-python set_password.py your@email.com NewPassword123
+python -c "import secrets; print(secrets.token_hex(32))"
 ```
 
-### Database issues
+**`no such table: users`**
+The database has not been initialised. Delete `study_planner.db` and restart the
+app — the schema and demo data are created automatically on first run.
 
-A backup of the database is created automatically as `study_planner.db.bak` when running `reset_user_password.py`. Restore it if needed, or delete it to start fresh.
+**`Address already in use`**
+Port 5000 is occupied. Stop the other process, or edit `PORT` in `run.py`.
+
+**Charts or statistics are empty**
+Log some study time from the dashboard, then revisit **Statistics**.
+
+**Reminder sounds fail to upload on Vercel**
+File uploads are intentionally disabled on Vercel because the filesystem is
+read-only and reset on each deployment. Upload sounds when running locally.
 
 ---
 
 ## Deploying to Vercel
 
-The app is fully configured for serverless deployment on [Vercel](https://vercel.com) with PostgreSQL as the production database.
+The app is ready to deploy. Connect the repository at
+<https://github.com/Austin-dev7/study-planner> to Vercel and add these
+**environment variables** under *Settings → Environment Variables*:
 
-### Prerequisites
+| Variable | Required | Description |
+|---|---|---|
+| `SECRET_KEY` | Yes | Session signing key. Generate with `python -c "import secrets; print(secrets.token_hex(32))"` |
+| `DATABASE_URL` | Recommended | PostgreSQL connection string. Without it the app falls back to SQLite in `/tmp`, which is **erased on every cold start** |
+| `COOKIE_SECURE` | Recommended | Set to `1` so session cookies are only sent over HTTPS |
 
-- A [Vercel](https://vercel.com) account
-- A PostgreSQL database (e.g., [Neon](https://neon.tech), [Supabase](https://supabase.com), or [Railway](https://railway.app))
+### Database behaviour
 
-### Steps
+| `DATABASE_URL` set | Database | Durability |
+|---|---|---|
+| Yes | PostgreSQL | Data persists across deployments |
+| No | SQLite in the system temp directory | Demo works, but all data resets on restart |
 
-1. **Push your code to GitHub** and import the repository in Vercel.
-
-2. **Set environment variables** in Vercel's dashboard (Project → Settings → Environment Variables):
-   - `SECRET_KEY` — a long random string (required). Generate one with:
-     ```bash
-     python -c "import secrets; print(secrets.token_hex(32))"
-     ```
-   - `DATABASE_URL` — your PostgreSQL connection string
-   - `COOKIE_SECURE` — set to `1` in production
-
-3. **Deploy.** Vercel automatically uses the existing `vercel.json` and `api/index.py` entry point. No additional build settings needed.
-
-4. **Create your first user** by visiting `/register` on your deployed app.
-
-> **Note:** The free SQLite database is for local development only. Vercel's serverless filesystem is ephemeral, so PostgreSQL is required for persistent data in production.
+Attach a free PostgreSQL instance from the Vercel dashboard (Storage → Create
+Database) or from a provider such as Neon or Supabase, then copy its connection
+string into `DATABASE_URL`.
 
 ---
 
 ## Security
 
-The application includes multiple layers of security hardening:
+- Passwords hashed with Werkzeug (scrypt), never stored in plain text
+- CSRF protection on all forms via Flask-WTF
+- Login rate limiting via Flask-Limiter
+- Session cookies marked `HttpOnly` and `SameSite=Lax`, and `Secure` when `COOKIE_SECURE=1`
+- Security headers on every response: `X-Content-Type-Options`, `X-Frame-Options`, `Referrer-Policy`, and a Content Security Policy
+- File uploads restricted by extension and rejected entirely on Vercel
 
-- **Password hashing** — All passwords are stored as secure hashes using Werkzeug's `generate_password_hash` (scrypt/pbkdf2). Legacy plaintext passwords are automatically migrated on startup.
-- **CSRF protection** — All POST forms are protected via Flask-WTF.
-- **Rate limiting** — Login attempts are limited to 10 per minute; global default limits apply (60/hour, 200/day).
-- **Session security** — Cookies are `HttpOnly`, `SameSite=Lax`, and optionally `Secure`. Session IDs are regenerated on login to prevent session fixation.
-- **Security headers** — `X-Content-Type-Options`, `X-Frame-Options`, `Referrer-Policy`, `X-XSS-Protection`, `Permissions-Policy`, and a Content-Security-Policy are set on every response.
-- **Secret key enforcement** — `SECRET_KEY` is required in production; the app refuses to start without it.
-- **File upload restrictions** — Only audio files (MP3, WAV, OGG, M4A, AAC) up to 16 MB are accepted.
-- **Session-based auth** — Every route verifies the logged-in user before serving data.
+To report a vulnerability, please open a GitHub issue rather than a public pull request.
 
 ---
 
 ## Contributing
 
-Contributions are welcome! Please read the [Contributing Guidelines](CONTRIBUTING.md) and [Code of Conduct](CODE_OF_CONDUCT.md) before submitting a pull request.
+Contributions are welcome. Please read [CONTRIBUTING.md](CONTRIBUTING.md) and the
+[Code of Conduct](CODE_OF_CONDUCT.md) first.
 
 ---
 
 ## Future Enhancements
 
+- Spaced-repetition review for notes
+- Export tasks and notes to CSV or PDF
 - Email notifications for reminders
-- Pomodoro study timer integration
-- Shared study groups and collaborative tasks
-- Export notes to PDF or text
-- Light/dark theme toggle
-- Automated goal tracking
-- Advanced analytics and reporting
-- Browser notifications for reminders
-- Data backup and export (JSON/CSV)     
-- Recurring task support 
+- Dark mode
+- Weekly progress email digest
 
 ---
 
 ## License
 
-This project is licensed under the [MIT License](LICENSE). You are free to use, modify, and distribute it.
-
----
-
-## Contact
-
-For questions, feedback, or contributions, please open an issue in the repository or reach out to the project maintainer.
+Released under the [MIT License](LICENSE).

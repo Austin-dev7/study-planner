@@ -1,0 +1,12 @@
+{% extends "base.html" %}
+
+{% block title %}Server Error - Study Planner{% endblock %}
+
+{% block content %}
+<div style="text-align: center; padding: 80px 20px;">
+    <i class="fas fa-exclamation-triangle" style="font-size: 64px; color: var(--danger); margin-bottom: 24px;"></i>
+    <h1 style="font-size: 32px; margin-bottom: 12px;">Something Went Wrong</h1>
+    <p style="color: var(--text-secondary); margin-bottom: 32px;">We're experiencing a server error. Please try again later.</p>
+    <a href="{{ url_for('dashboard') }}" class="btn btn-primary">Go to Dashboard</a>
+</div>
+{% endblock %}

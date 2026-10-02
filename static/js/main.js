@@ -39,7 +39,7 @@ document.addEventListener('click', function(e) {
     if (window.innerWidth <= 768 && 
         sidebar.classList.contains('open') && 
         !sidebar.contains(e.target) && 
-        !toggle.contains(e.target)) {
+        !toggle.contains(e.target)) { 
         sidebar.classList.remove('open');
     }
 });

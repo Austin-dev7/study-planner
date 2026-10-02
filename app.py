@@ -2,6 +2,7 @@ from flask import Flask, render_template, request, redirect, url_for, session, j
 from datetime import datetime, timedelta
 import calendar
 import os
+import tempfile
 import uuid
 import secrets
 from werkzeug.utils import secure_filename
@@ -10,25 +11,37 @@ from flask_wtf.csrf import CSRFProtect
 from flask_limiter import Limiter
 from flask_limiter.util import get_remote_address
 
+IS_VERCEL = os.environ.get('VERCEL') == '1'
+IS_PRODUCTION = os.environ.get('FLASK_ENV') == 'production' or IS_VERCEL
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+
 # ===== Database Backend Selection =====
+# Postgres is used whenever DATABASE_URL is present (required for real, durable
+# data on Vercel). Without it we fall back to SQLite, which is placed in /tmp on
+# Vercel because the deployed filesystem is read-only and wiped on every cold
+# start. That fallback keeps the demo usable but does NOT persist data.
 DATABASE_URL = os.environ.get('DATABASE_URL', '')
 
 if DATABASE_URL:
     import psycopg2
     import psycopg2.extras
     DB_IS_POSTGRES = True
+    DB_PATH = ''
 else:
     import sqlite3
     DB_IS_POSTGRES = False
+    DB_PATH = os.path.join(tempfile.gettempdir(), 'study_planner.db') if IS_VERCEL else os.path.join(BASE_DIR, 'study_planner.db')
 
 app = Flask(__name__)
 
 if os.environ.get('SECRET_KEY'):
     app.secret_key = os.environ['SECRET_KEY']
 else:
-    current_is_production = os.environ.get('FLASK_ENV') == 'production' or os.environ.get('VERCEL') == '1'
-    if current_is_production:
-        raise RuntimeError('SECRET_KEY environment variable must be set in production.')
+    if IS_PRODUCTION:
+        raise RuntimeError(
+            'SECRET_KEY environment variable must be set in production. '
+            'Add it in Vercel under Settings -> Environment Variables.'
+        )
     app.secret_key = secrets.token_hex(32)
 
 # ===== Security Configuration =====
@@ -64,9 +77,14 @@ def set_security_headers(response):
     )
     return response
 
-# Upload folder for reminder sounds
-UPLOAD_FOLDER = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'static', 'uploads', 'sounds')
-os.makedirs(UPLOAD_FOLDER, exist_ok=True)
+# Upload folder for reminder sounds. Vercel's filesystem is read-only, so the
+# directory is only created when it is actually writable; sound uploads are
+# rejected server-side on Vercel anyway.
+UPLOAD_FOLDER = os.path.join(BASE_DIR, 'static', 'uploads', 'sounds')
+try:
+    os.makedirs(UPLOAD_FOLDER, exist_ok=True)
+except OSError:
+    pass
 ALLOWED_EXTENSIONS = {'mp3', 'wav', 'ogg', 'm4a', 'aac'}
 
 def allowed_file(filename):
@@ -82,7 +100,7 @@ class DB:
     def execute(self, sql, params=None):
         if self.is_postgres:
             sql = sql.replace("strftime('%Y-%m', due_date)", 'LEFT(due_date, 7)')
-            sql = sql.replace("date('now', '-7 days')", "(CURRENT_DATE - INTERVAL '7 days')")
+            sql = sql.replace("date('now', '-7 days')", "to_char(CURRENT_DATE - INTERVAL '7 days', 'YYYY-MM-DD')")
             sql = sql.replace("datetime(reminder_time) <= datetime(?)", "reminder_time::timestamp <= %s::timestamp")
             sql = sql.replace("datetime(reminder_time) >= datetime(?, '-5 minutes')", "reminder_time::timestamp >= %s::timestamp - INTERVAL '5 minutes'")
             stripped = sql.lstrip().upper()
@@ -122,7 +140,7 @@ def get_db():
     if DB_IS_POSTGRES:
         conn = psycopg2.connect(DATABASE_URL, cursor_factory=psycopg2.extras.RealDictCursor)
     else:
-        conn = sqlite3.connect('study_planner.db')
+        conn = sqlite3.connect(DB_PATH)
         conn.row_factory = sqlite3.Row
     return DB(conn)
 
@@ -826,7 +844,7 @@ def check_reminders():
 def upload_sound():
     if 'user_id' not in session:
         return jsonify({'error': 'Unauthorized'}), 401
-    if os.environ.get('VERCEL') == '1':
+    if IS_VERCEL:
         return jsonify({'error': 'File uploads are not supported on Vercel. Files are lost on each deployment.'}), 400
     if 'sound' not in request.files:
         return jsonify({'error': 'No file uploaded'}), 400
@@ -865,7 +883,7 @@ def delete_sound(sound_id):
     if not sound:
         conn.close()
         return jsonify({'error': 'Not found'}), 404
-    file_path = os.path.join('static', sound['file_path'])
+    file_path = os.path.join(BASE_DIR, 'static', sound['file_path'])
     if os.path.exists(file_path):
         os.remove(file_path)
     conn.execute('DELETE FROM reminder_sounds WHERE id = ?', (sound_id,))
@@ -877,12 +895,20 @@ def delete_sound(sound_id):
 @csrf.exempt
 def delete_subject(subject_id):
     if 'user_id' not in session:
-        return jsonify({'error': 'Unauthorized'}), 401
+        return jsonify({'error': 'Unauthorized'}), 401 
     conn = get_db()
     conn.execute('DELETE FROM subjects WHERE id = ? AND user_id = ?', (subject_id, session['user_id']))
     conn.commit()
     conn.close()
     return jsonify({'success': True})
+
+@app.errorhandler(404)
+def not_found(e):
+    return render_template('404.html'), 404
+
+@app.errorhandler(500)
+def server_error(e): 
+    return render_template('500.html'), 500
 
 if __name__ == '__main__':
     debug_mode = os.environ.get('FLASK_DEBUG', '1') == '1'

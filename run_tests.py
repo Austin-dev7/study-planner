@@ -60,7 +60,7 @@ if __name__ == '__main__':
     # Basic GET endpoints
     expect_get('/login', 200)
     expect_get('/register', 302)
-    expect_get('/', 302)
+    expect_get('/', 200)
 
     # Create a test user and log in
     create_test_user()
