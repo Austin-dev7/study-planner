@@ -872,3 +872,45 @@ a {
         flex-direction: column;
     }
 }
+
+/* ===== APP FOOTER & DEV7 BADGE ===== */
+.app-footer {
+    margin-left: 260px;
+    padding: 16px 32px 24px;
+    text-align: center;
+    color: var(--text-muted);
+    font-size: 0.8rem;
+    transition: var(--transition);
+}
+
+.main-content.full-width .app-footer {
+    margin-left: 0;
+}
+
+/* Dev7 badge — cyan→red gradient with subtle pulse underline */
+.dev7-badge {
+  background: linear-gradient(90deg, #22d3ee 0%, #e63946 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  position: relative;
+  padding-bottom: 4px;
+}
+.dev7-badge::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  height: 2px;
+  background: linear-gradient(90deg, #22d3ee 0%, #e63946 100%);
+  opacity: 0.5;
+  border-radius: 2px;
+  animation: dev7-pulse 3s ease-in-out infinite;
+}
+@keyframes dev7-pulse {
+  0%, 100% { opacity: 0.25; transform: scaleX(0.9); }
+  50% { opacity: 0.85; transform: scaleX(1.05); }
+}

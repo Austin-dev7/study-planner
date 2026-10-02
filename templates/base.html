@@ -75,6 +75,10 @@
         {% block content %}{% endblock %}
     </main>
 
+    <footer class="app-footer">
+        Built by <span class="dev7-badge">Dev7</span> · Plan. Study. Achieve.
+    </footer>
+
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="{{ url_for('static', filename='js/main.js') }}"></script>
     {% block extra_js %}{% endblock %}
